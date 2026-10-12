@@ -1,0 +1,18 @@
+fastapi==0.115.6
+uvicorn==0.34.0
+httpx==0.28.1
+playwright==1.49.1
+# Phase 3 — fingerprint-evasion shim layered on Playwright. Reduces
+# detection by Google/Microsoft anti-automation heuristics when the
+# bot is running as an authenticated workspace user.
+playwright-stealth==1.0.6
+# boto3 — fetch the Chromium-profile tarball from AWS Secrets Manager.
+# Imported lazily via videoclip_common.secrets when Phase 3 is enabled.
+boto3>=1.34
+pydantic==2.10.4
+python-multipart==0.0.20
+pytest==8.3.4
+pytest-asyncio==0.25.0
+# browser-mode capture: localhost WS ingest + frame buffering
+websockets>=12.0
+numpy>=1.26

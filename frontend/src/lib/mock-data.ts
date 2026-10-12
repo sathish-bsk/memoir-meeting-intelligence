@@ -1,0 +1,183 @@
+import { CallListItem, CallDetail, WeeklyDigest, TeamListMember } from "./types";
+
+export const mockCalls: CallListItem[] = [
+  {
+    id: "1",
+    prospect_name: "Sarah Chen",
+    prospect_company: "TechCorp",
+    call_type: "Discovery",
+    duration: 34,
+    time: "2:15 PM",
+    date: "Today",
+    top_takeaway: "Budget discussed ($40-60K range), demo requested for next week",
+    outcome: "positive",
+    crm_status: "pushed",
+    confidence: 84,
+    rep_name: "John Smith",
+  },
+  {
+    id: "2",
+    prospect_name: "David Park",
+    prospect_company: "FinanceHub",
+    call_type: "Follow-up",
+    duration: 18,
+    time: "11:30 AM",
+    date: "Today",
+    top_takeaway: "Pricing concerns raised, wants to loop in CTO before decision",
+    outcome: "neutral",
+    crm_status: "pending",
+    confidence: 62,
+    rep_name: "John Smith",
+  },
+  {
+    id: "3",
+    prospect_name: "Alex Rivera",
+    prospect_company: "StartupXYZ",
+    call_type: "Cold call",
+    duration: 8,
+    time: "4:45 PM",
+    date: "Yesterday",
+    top_takeaway: "Low interest, company too early-stage — wrong ICP",
+    outcome: "negative",
+    crm_status: "pushed",
+    confidence: 55,
+    rep_name: "Lisa Park",
+  },
+  {
+    id: "4",
+    prospect_name: "Maria Santos",
+    prospect_company: "ScaleOps",
+    call_type: "Demo",
+    duration: 45,
+    time: "10:00 AM",
+    date: "Yesterday",
+    top_takeaway: "Strong interest in CRM auto-fill, asked about API integration timeline",
+    outcome: "positive",
+    crm_status: "pushed",
+    confidence: 91,
+    rep_name: "John Smith",
+  },
+  {
+    id: "5",
+    prospect_name: "Raj Patel",
+    prospect_company: "CloudNine",
+    call_type: "Discovery",
+    duration: 22,
+    time: "3:30 PM",
+    date: "2 days ago",
+    top_takeaway: "Using Gong currently but frustrated with cost, evaluating alternatives",
+    outcome: "positive",
+    crm_status: "pending",
+    confidence: 77,
+    rep_name: "Lisa Park",
+  },
+];
+
+export const mockCallDetail: CallDetail = {
+  id: "1",
+  prospect_name: "Sarah Chen",
+  prospect_title: "VP of Sales",
+  prospect_company: "TechCorp",
+  call_type: "Discovery",
+  call_date: "Jan 15, 2026",
+  duration: 34,
+  time: "2:15 PM",
+  confidence: 84,
+  crm_status: "pending",
+  summary: `Sarah Chen, VP of Sales at TechCorp, joined the call to evaluate Memoir as a replacement for their current manual call documentation process. She described a team of 12 sales reps spending an average of 20 minutes per call updating their HubSpot CRM, which she estimated costs the team roughly 15 hours per week in lost selling time.\n\nShe expressed strong interest in the CRM auto-fill capability, calling it "the single biggest time-saver I've seen this quarter." Budget was discussed openly — TechCorp has allocated $40-60K annually for sales tooling, and their current Gong contract at $5K/month is up for renewal in Q2.\n\nSarah wants to schedule a demo with her CTO, James Liu, who would need to approve any new tool integration. She also asked about API capabilities for connecting Memoir to their internal reporting dashboard. The call ended with a clear next step: demo scheduled for January 22 with both Sarah and James.`,
+  crm_fields: [
+    { name: "Budget", value: "$40-60K/year", confidence: "definitive", speaker: "Sarah Chen", quote: "We've allocated forty to sixty thousand annually for sales tooling" },
+    { name: "Timeline", value: "Q2 2026", confidence: "indicative", speaker: "Sarah Chen", quote: "Our Gong contract is up next quarter, so probably looking at Q2" },
+    { name: "Decision Maker", value: "James Liu, CTO", confidence: "definitive", speaker: "Sarah Chen", quote: "James would need to sign off on any new integrations" },
+    { name: "Pain Point", value: "Manual CRM updates (15 hrs/week)", confidence: "definitive", speaker: "Sarah Chen", quote: "My team spends roughly 20 minutes per call just updating HubSpot" },
+    { name: "Current Stack", value: "Gong ($5K/mo), HubSpot", confidence: "indicative", speaker: "Sarah Chen", quote: "We're on Gong right now... paying about five thousand a month" },
+    { name: "Team Size", value: "~12 reps", confidence: "definitive", speaker: "Sarah Chen", quote: "I have twelve reps on the team" },
+    { name: "Competitors", value: "Gong (incumbent)", confidence: "definitive", speaker: "Sarah Chen", quote: "We're on Gong right now" },
+  ],
+  action_items_rep: [
+    "Send pricing comparison doc (Memoir vs Gong)",
+    "Schedule demo for Jan 22 with Sarah + CTO James Liu",
+    "Prepare API integration timeline for CTO questions",
+  ],
+  action_items_prospect: [
+    "Share internal requirements doc by Friday",
+    "Confirm CTO availability for Jan 22 demo",
+  ],
+  buying_signals: [
+    "Asked about pricing and contract terms",
+    "Wants to involve CTO (decision-maker engagement)",
+    "Mentioned specific timeline (Q2 contract renewal)",
+    "Called auto-fill 'biggest time-saver this quarter'",
+  ],
+  risk_signals: [
+    "CTO approval required — unknown stakeholder",
+    "Asked about API (potential blocker if unavailable)",
+  ],
+  suggested_stage: "Discovery → Qualified Lead",
+};
+
+export const mockDigest: WeeklyDigest = {
+  week: "Jan 13-19",
+  total_calls: 14,
+  total_reps: 3,
+  total_hours: 8.5,
+  headline: "4 prospects asked for API integration this week",
+  opening: "14 calls this week across 3 reps. Pricing sentiment is warming — 73% positive reactions vs 58% last week. The biggest pattern: API integration came up as a blocker in 4 separate deals. Gong remains the primary competitor mentioned, but mostly as 'too expensive for our size.'",
+  scoreboard: { calls: 14, strong_fits: 8, competitor_mentions: 12, pricing_positive: 73, blockers: 3, feature_requests: 6 },
+  feature_requests: [
+    { name: "API Integration", count: 4, quote: "We need this to connect with our internal tools", speaker: "James Liu, CTO", company: "TechCorp" },
+    { name: "Mobile App", count: 2, quote: "Our reps are on the road, desktop won't work", speaker: "VP Sales", company: "FieldCo" },
+    { name: "Salesforce Support", count: 2, quote: "We're a Salesforce shop, HubSpot only is a dealbreaker", speaker: "RevOps Lead", company: "ScaleOps" },
+  ],
+  praises: [
+    { name: "CRM auto-fill", count: 9, quote: "This alone is worth the price" },
+    { name: "Call summaries", count: 7, quote: "Saves me 20 minutes every call" },
+    { name: "Confidence tagging", count: 3, quote: "Love that it tells me how sure it is" },
+  ],
+  competitors: [
+    { name: "Gong", mentions: 6, positive: "Powerful analytics and coaching", negative: "Way too expensive for our size" },
+    { name: "Fathom", mentions: 3, positive: "Free transcription is great", negative: "No CRM integration" },
+    { name: "Otter.ai", mentions: 2, positive: "Good transcription quality", negative: "Not built for sales teams" },
+  ],
+  objections: [
+    { text: "No API / integration limitations", count: 4, severity: "blocker", quote: "Without API access we can't make this work" },
+    { text: "Need CTO/technical buy-in", count: 3, severity: "concern", quote: "I'd need to run this by engineering first" },
+    { text: "Already using Gong", count: 2, severity: "concern", quote: "Switching costs are a factor" },
+  ],
+  pain_quotes: [
+    { quote: "I spend more time updating Salesforce than actually selling", speaker: "Mike Torres", title: "AE", company: "CloudScale", size: "Series B, 45 ppl" },
+    { quote: "By Friday my CRM is a graveyard of empty fields", speaker: "Sarah Chen", title: "VP Sales", company: "TechCorp", size: "Seed, 12 ppl" },
+  ],
+  desire_quotes: [
+    { quote: "Something that just listens and handles the busywork", speaker: "David Park", title: "Founder", company: "FinanceHub", size: "Pre-seed, 6 ppl" },
+    { quote: "I want to know what customers say when I'm not in the room", speaker: "Priya Sharma", title: "CEO", company: "SaaSly", size: "Seed, 18 ppl" },
+  ],
+  icp: { strong: 8, partial: 4, poor: 2, poor_note: "2 enterprise companies (500+ ppl) needing SSO and SOC2 we don't have" },
+  team: {
+    strengths: ["Strong discovery questioning — prospects opened up about budgets in 8 of 14 calls"],
+    coaching: ["3 calls ended without clear next steps. Reinforce 'always book the next meeting before hanging up.'"],
+  },
+  takeaways: [
+    "API integration is the #1 blocker — 4 deals stalled. Prioritize on the roadmap.",
+    "Pricing is landing well at $19-79/mo. The 'compared to Gong' anchor is working in our favor.",
+    "ICP is mostly right — the 2 poor fits were enterprise inbounds. Consider adding a qualifier.",
+  ],
+  wow: {
+    pricing: "▲ 73% vs 58% positive",
+    competitors: "▼ 12 vs 18 mentions (Gong fading?)",
+    new: "Mobile app requests appeared for first time",
+  },
+};
+
+export const mockTeamMembers: TeamListMember[] = [
+  { name: "Vivek Sharma", email: "vivek@memoir.app", role: "Founder", calls: 12, ext: true },
+  { name: "John Smith", email: "john@acme.com", role: "Sales Rep", calls: 8, ext: true },
+  { name: "Lisa Park", email: "lisa@acme.com", role: "Sales Rep", calls: 4, ext: false },
+];
+
+export const mockTranscript = [
+  { time: "0:00", speaker: "John", role: "rep", text: "Hey Sarah, thanks for taking the time today. How's your week going?" },
+  { time: "0:12", speaker: "Sarah", role: "prospect", text: "Good, good. Busy as always. We've been evaluating a bunch of tools this quarter, so I'm glad we could fit this in." },
+  { time: "0:24", speaker: "John", role: "rep", text: "Absolutely. I'd love to start by understanding what your team's workflow looks like today. How are your reps currently handling call documentation?" },
+  { time: "0:38", speaker: "Sarah", role: "prospect", text: "Honestly, it's a mess. I have twelve reps on the team, and each one spends roughly 20 minutes after every call just updating HubSpot. Notes, deal fields, next steps — it all has to go in manually." },
+];

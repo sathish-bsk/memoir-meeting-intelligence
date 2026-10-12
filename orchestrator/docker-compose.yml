@@ -1,0 +1,41 @@
+services:
+  orchestrator:
+    build: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - BOT_IMAGE=botworker:latest
+      - BOT_NETWORK=bot-network
+      - ORCHESTRATOR_URL=http://orchestrator:4000
+      - BACKEND_CALLBACK_URL=${BACKEND_CALLBACK_URL:-}
+      - TRANSCRIPTION_URL=${TRANSCRIPTION_URL:-http://host.docker.internal:8000}
+      - STORAGE_BACKEND=${STORAGE_BACKEND:-local}
+      - BOT_RECORDINGS_DIR=${BOT_RECORDINGS_DIR:-/Users/bsk/Documents/Personal/VideoClip/BotWorker/recordings}
+      - MAX_CONCURRENT_BOTS=${MAX_CONCURRENT_BOTS:-10}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      - redis
+    networks:
+      - bot-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - bot-network
+    restart: unless-stopped
+
+networks:
+  bot-network:
+    name: bot-network
+    driver: bridge
+
+volumes:
+  redis-data:

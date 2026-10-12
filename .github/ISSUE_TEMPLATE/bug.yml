@@ -1,0 +1,94 @@
+name: Bug Report
+description: Report a bug for AI processing
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's broken? You can paste screenshots or drag-drop files here instead of writing text.
+      placeholder: Describe the bug, or just attach screenshots/recordings showing the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current Behavior (what's wrong)
+      description: Describe or attach a screenshot/recording of what currently happens.
+      placeholder: |
+        Paste a screenshot here, or describe:
+        e.g. "Login button stays static when clicked"
+    validations:
+      required: false
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior (what should happen)
+      description: Describe or attach a mockup/screenshot of the desired result.
+      placeholder: |
+        Paste a mockup/screenshot here, or describe:
+        e.g. "Button should show a spinner while loading"
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce (optional)
+      description: How to trigger the bug. Skip if the screenshots make it obvious.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria (optional)
+      description: How do we know this is fixed? If left blank, devflow will infer from the description and attachments.
+      placeholder: |
+        - [ ]
+        - [ ]
+    validations:
+      required: false
+  - type: dropdown
+    id: ui_change
+    attributes:
+      label: UI Change?
+      description: Does this involve visible UI changes? If yes, devflow will record a video verification.
+      options:
+        - "No — backend/logic only"
+        - "Yes — UI needs visual verification"
+    validations:
+      required: true
+  - type: textarea
+    id: visual_verify
+    attributes:
+      label: Visual Verification (if UI change)
+      description: Attach before/after screenshots or describe what the recording should show. Leave blank if not a UI change.
+      placeholder: |
+        Attach screenshots showing:
+        - Before: [drag screenshot of current broken state]
+        - After: [drag mockup of expected fixed state]
+
+        Or describe:
+        1. Navigate to /settings
+        2. Click "Save" with empty name
+        3. Error message should appear
+    validations:
+      required: false
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Additional Attachments
+      description: Drag-drop any additional files — spec documents (PDF, Word), design mockups, error logs, etc. All attached files will be downloaded and provided to the AI.
+    validations:
+      required: false
+  - type: textarea
+    id: files
+    attributes:
+      label: Affected Files (optional)
+      description: Which files likely need changes?
+    validations:
+      required: false

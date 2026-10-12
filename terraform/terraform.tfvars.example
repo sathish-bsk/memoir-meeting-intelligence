@@ -1,0 +1,17 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — NEVER commit it.
+
+# Path to your SSH public key
+ssh_public_key_path = "~/.ssh/memoir-prod-key.pub"
+
+# Your IP address(es) allowed to SSH
+# Find your IP: curl ifconfig.me
+ssh_allowed_cidrs = ["YOUR_IP/32"]
+
+# Vast.ai GPU IP — leave empty until GPU is provisioned
+gpu_ip = ""
+
+# Uncomment to override defaults:
+# instance_type = "t3.large"
+# volume_size   = 30
+# aws_region    = "ap-south-1"

@@ -1,0 +1,38 @@
+# Auth Service — Dev Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Changes from production:
+# - Service ports exposed to host for debugging
+# - Hot-reload via volume mount
+# - Dev environment variables and keys
+
+services:
+  auth-service:
+    volumes:
+      - ./app:/app/app  # Hot-reload
+    ports:
+      - "8001:8000"  # Exposed for direct debugging
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://auth_user:authpass@auth-db:5432/auth_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_PRIVATE_KEY_PATH=/app/keys/private.pem
+      - JWT_PUBLIC_KEY_PATH=/app/keys/public.pem
+      - INTERNAL_SERVICE_KEY=dev-internal-key-change-in-production
+      - FERNET_KEY=dev-fernet-key-change-in-production-00=
+      - BASE_URL=http://localhost
+      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=development
+    labels:
+      # Override: use 'web' entrypoint (HTTP only)
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth-public.entrypoints=web"
+      - "traefik.http.routers.auth-verify.entrypoints=web"
+      - "traefik.http.routers.auth-protected.entrypoints=web"
+
+  auth-db:
+    ports:
+      - "5433:5432"  # Exposed for direct DB access
+
+  redis:
+    ports:
+      - "6380:6379"  # Exposed for direct Redis access

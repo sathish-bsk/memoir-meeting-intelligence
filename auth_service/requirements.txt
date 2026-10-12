@@ -1,0 +1,41 @@
+# Web framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+python-multipart>=0.0.20
+
+# Async HTTP client
+httpx>=0.28.0
+
+# Database — ORM + async driver
+sqlalchemy[asyncio]>=2.0.36
+asyncpg>=0.30.0
+alembic>=1.14.0
+
+# Password hashing — Argon2id (OWASP recommended)
+argon2-cffi>=23.1.0
+
+# JWT — ES256 signing
+python-jose[cryptography]>=3.3.0
+cryptography>=44.0.0
+
+# OAuth — Google, Microsoft
+authlib>=1.4.0
+
+# Redis — rate limiting, token blacklist, caching
+redis[hiredis]>=5.2.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Validation
+pydantic>=2.10.0
+email-validator>=2.0.0
+
+# User agent parsing (session device tracking)
+user-agents>=2.2.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+pytest-cov>=5.0.0
+httpx  # TestClient transport

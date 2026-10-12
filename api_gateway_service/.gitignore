@@ -1,0 +1,6 @@
+# ACME / TLS certs
+traefik/acme/
+
+# IDE
+.vscode/
+.idea/

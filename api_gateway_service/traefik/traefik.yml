@@ -1,0 +1,79 @@
+# Traefik v3 — Static Configuration (Production)
+# This file defines entrypoints, providers, and global settings.
+# Dynamic config (middlewares, routers) lives in ./dynamic/ and Docker labels.
+
+# ─── API & Dashboard ──────────────────────────────────────────────
+api:
+  dashboard: false  # Disabled in prod. Enabled in traefik-dev.yml
+
+# ─── Entrypoints ──────────────────────────────────────────────────
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - security-headers@file
+
+# ─── Certificate Resolvers ────────────────────────────────────────
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "${ACME_EMAIL}"
+      storage: /acme/acme.json
+      httpChallenge:
+        entryPoint: web
+
+# ─── Providers ────────────────────────────────────────────────────
+providers:
+  # Docker provider — auto-discovers services via labels
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false  # Only services with traefik.enable=true are routed
+    network: videoclip-public
+    watch: true
+
+  # File provider — dynamic middleware/TLS config
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# ─── Logging ──────────────────────────────────────────────────────
+log:
+  level: INFO
+  format: json
+
+accessLog:
+  format: json
+  filters:
+    statusCodes:
+      - "400-599"
+  fields:
+    headers:
+      defaultMode: drop
+      names:
+        X-Request-ID: keep
+        X-Forwarded-For: keep
+        User-Agent: keep
+        Content-Type: keep
+
+# ─── Metrics (Prometheus) ─────────────────────────────────────────
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true
+    addServicesLabels: true
+
+# ─── Additional Entrypoints ──────────────────────────────────────
+# Metrics endpoint (internal only, not exposed via Docker)
+  # Defined here for Prometheus scraping in production

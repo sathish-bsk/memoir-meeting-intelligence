@@ -1,0 +1,74 @@
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# HTTP client with async support
+httpx>=0.25.0
+
+# ASR - Official OpenAI Whisper
+openai-whisper>=20231117
+
+# ASR - faster-whisper (CTranslate2) for audio_preprocess pipeline
+faster-whisper>=1.0.0
+
+# ASR - Pingala V1 Universal (ShunyaLabs)
+pingala-shunya>=0.1.0
+huggingface_hub>=0.20.0,<0.21
+
+# ASR - AI4Bharat (Whisper Tamil + Aksharamukha for Tamil romanization)
+aksharamukha>=2.0
+
+# Audio preprocessing
+noisereduce>=3.0
+deepfilternet>=0.5
+
+# Speaker diarization Phase 2
+pyannote.audio>=3.1,<4.0
+
+# Word-level forced alignment (Phase 3)
+ctc-forced-aligner>=0.3.0
+unidecode>=1.3.0  # Required by ctc-forced-aligner for non-Latin script romanization
+
+# Vocabulary correction (Phase 5a + 5b + 6a) — phonetic encoding + string distance
+jellyfish>=1.0.0
+rapidfuzz>=3.0.0
+
+# Punctuation restoration for speaker boundary correction
+deepmultilingualpunctuation>=1.0.1
+
+# Pin NumPy to 1.x for compatibility with Whisper dependencies
+numpy<2
+
+# YouTube download
+yt-dlp>=2023.11.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Database (job processor queue)
+asyncpg>=0.29.0
+
+# Redis (job progress reporting)
+redis>=5.0.0
+
+# Type hints
+pydantic>=2.5.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Shared storage abstraction (local/S3/R2)
+videoclip-common @ file:///../videoclip_common
+
+# Multi-provider intelligence pipeline (Phase B)
+anthropic>=0.40.0
+google-genai>=1.0.0
+groq>=0.9.0
+
+# LangSmith tracing + LangChain Hub prompt management (env-gated; default off)
+# See plan/langchain_langsmith_integration.md
+langsmith>=0.4.0
+langchain>=0.3.0           # only for hub.pull() — we do NOT use the framework runtime
+langchain-core>=0.3.0      # for ChatPromptTemplate

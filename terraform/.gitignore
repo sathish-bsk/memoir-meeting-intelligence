@@ -1,0 +1,22 @@
+# Terraform provider cache
+.terraform/
+
+# State files (contain resource IDs and some sensitive data)
+*.tfstate
+*.tfstate.*
+
+# Provider lock file
+.terraform.lock.hcl
+
+# Actual variable values (contain IPs, key paths)
+terraform.tfvars
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

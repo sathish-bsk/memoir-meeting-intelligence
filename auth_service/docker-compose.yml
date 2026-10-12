@@ -1,0 +1,103 @@
+# Auth Service — Production Docker Compose
+# Usage: docker compose up -d
+# Dev:   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # ─── Auth Service ─────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: videoclip-auth
+    restart: unless-stopped
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://auth_user:${AUTH_DB_PASSWORD:-authpass}@auth-db:5432/auth_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_PRIVATE_KEY_PATH=/run/secrets/jwt_private_key
+      - JWT_PUBLIC_KEY_PATH=/run/secrets/jwt_public_key
+      - INTERNAL_SERVICE_KEY=${INTERNAL_SERVICE_KEY}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
+      - OAUTH_MICROSOFT_CLIENT_ID=${OAUTH_MICROSOFT_CLIENT_ID}
+      - OAUTH_MICROSOFT_CLIENT_SECRET=${OAUTH_MICROSOFT_CLIENT_SECRET}
+      - FERNET_KEY=${FERNET_KEY}
+      - BASE_URL=${BASE_URL:-https://app.meetmemoir.com}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    networks:
+      - auth-network
+    labels:
+      # ── Public auth routes (no ForwardAuth) ──
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth-public.rule=PathPrefix(`/auth/login`) || PathPrefix(`/auth/signup`) || PathPrefix(`/auth/refresh`) || PathPrefix(`/auth/forgot-password`) || PathPrefix(`/auth/reset-password`) || PathPrefix(`/auth/verify-email`) || PathPrefix(`/auth/oauth`)"
+      - "traefik.http.routers.auth-public.entrypoints=websecure"
+      - "traefik.http.routers.auth-public.middlewares=chain-auth-public@file"
+      - "traefik.http.routers.auth-public.service=auth-svc"
+      - "traefik.http.routers.auth-public.priority=20"
+      # ── ForwardAuth verify endpoint (Traefik-only) ──
+      - "traefik.http.routers.auth-verify.rule=Path(`/auth/verify`)"
+      - "traefik.http.routers.auth-verify.entrypoints=websecure"
+      - "traefik.http.routers.auth-verify.middlewares=security-headers@file"
+      - "traefik.http.routers.auth-verify.service=auth-svc"
+      - "traefik.http.routers.auth-verify.priority=30"
+      # ── Protected auth routes (with ForwardAuth) ──
+      - "traefik.http.routers.auth-protected.rule=PathPrefix(`/auth`)"
+      - "traefik.http.routers.auth-protected.entrypoints=websecure"
+      - "traefik.http.routers.auth-protected.middlewares=chain-auth-protected@file"
+      - "traefik.http.routers.auth-protected.service=auth-svc"
+      - "traefik.http.routers.auth-protected.priority=10"
+      # ── Service definition ──
+      - "traefik.http.services.auth-svc.loadbalancer.server.port=8000"
+
+  # ─── Auth Database ────────────────────────────────────────────────
+  auth-db:
+    image: postgres:16-alpine
+    container_name: videoclip-auth-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=auth_user
+      - POSTGRES_PASSWORD=${AUTH_DB_PASSWORD:-authpass}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=false"
+
+  # ─── Redis ────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: videoclip-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=false"
+
+# ─── Networks ─────────────────────────────────────────────────────
+networks:
+  auth-network:
+    name: auth-network
+
+# ─── Volumes ──────────────────────────────────────────────────────
+volumes:
+  auth-db-data:
+  redis-data:

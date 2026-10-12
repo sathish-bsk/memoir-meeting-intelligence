@@ -1,0 +1,64 @@
+name: Feature Request
+description: Request a new feature for AI implementation
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What should be built? You can paste screenshots, mockups, or drag-drop a spec document (PDF, Word) instead of writing text.
+      placeholder: |
+        Describe the feature, or attach a spec document / mockup.
+        Drag-drop files here — PDFs, images, Word docs all work.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria (optional)
+      description: How do we know this is done? If left blank, devflow will infer from the description and attachments.
+      placeholder: |
+        - [ ]
+        - [ ]
+    validations:
+      required: false
+  - type: dropdown
+    id: ui_change
+    attributes:
+      label: UI Change?
+      description: Does this involve visible UI changes? If yes, devflow will record a video verification.
+      options:
+        - "No — backend/logic only"
+        - "Yes — UI needs visual verification"
+    validations:
+      required: true
+  - type: textarea
+    id: visual_verify
+    attributes:
+      label: Visual Verification (if UI change)
+      description: Attach mockups/wireframes showing what it should look like, or describe what the recording should show.
+      placeholder: |
+        Attach mockups:
+        - [drag wireframe/mockup of the new feature]
+
+        Or describe:
+        1. Navigate to /dashboard
+        2. Click "New Widget"
+        3. Widget appears in the list
+    validations:
+      required: false
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Additional Attachments
+      description: Drag-drop any additional files — spec documents (PDF, Word), design mockups, API docs, etc. All attached files will be downloaded and provided to the AI.
+    validations:
+      required: false
+  - type: textarea
+    id: files
+    attributes:
+      label: Affected Files (optional)
+      description: Which files likely need changes?
+    validations:
+      required: false

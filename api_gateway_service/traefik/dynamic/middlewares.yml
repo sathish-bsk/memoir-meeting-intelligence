@@ -1,0 +1,137 @@
+# Traefik Dynamic Configuration — Middlewares
+# All middleware definitions used by Docker label-based routers.
+
+http:
+  middlewares:
+    # ─── Security Headers ─────────────────────────────────────────
+    security-headers:
+      headers:
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000  # 1 year HSTS
+        customFrameOptionsValue: "SAMEORIGIN"
+        referrerPolicy: "strict-origin-when-cross-origin"
+        # microphone=(self) — required for /record web recorder + in-app
+        # mic picker (getUserMedia + enumerateDevices labels). The default
+        # camera=() and geolocation=() denies remain; nothing in the app
+        # needs them yet.
+        permissionsPolicy: "camera=(), microphone=(self), geolocation=()"
+        customResponseHeaders:
+          X-Powered-By: ""  # Remove framework fingerprint
+          Server: ""        # Remove server fingerprint
+
+    # ─── CORS ─────────────────────────────────────────────────────
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowHeaders:
+          - Authorization
+          - Content-Type
+          - X-Request-ID
+          - X-Team-ID
+        accessControlExposeHeaders:
+          - X-Request-ID
+        accessControlAllowOriginList:
+          - "${CORS_ORIGIN:-http://localhost:3000}"
+        accessControlMaxAge: 7200
+        accessControlAllowCredentials: true
+        addVaryHeader: true
+
+    # ─── Rate Limiting — Auth endpoints (strict) ──────────────────
+    rate-limit-auth:
+      rateLimit:
+        average: 10
+        burst: 20
+        period: 1m
+
+    # ─── Rate Limiting — API endpoints (standard) ─────────────────
+    rate-limit-api:
+      rateLimit:
+        average: 60
+        burst: 100
+        period: 1m
+
+    # ─── Rate Limiting — Public/Frontend (lenient) ────────────────
+    rate-limit-public:
+      rateLimit:
+        average: 120
+        burst: 200
+        period: 1m
+
+    # ─── ForwardAuth — JWT validation via Auth Service ────────────
+    forward-auth:
+      forwardAuth:
+        address: "http://auth-service:8000/auth/verify"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - X-User-ID
+          - X-User-Email
+          - X-User-Name
+          - X-Team-ID
+          - X-Team-Role
+          - X-Plan
+          - X-Onboarding-Completed
+          - X-User-Scopes
+
+    # ─── Block Internal Endpoints ─────────────────────────────────
+    block-internal:
+      replacePath:
+        path: "/blocked"
+      # Internal paths are blocked by routing — no router defined for /internal/*
+      # This middleware is a safety net applied via Docker labels
+
+    # ─── Request ID Injection ─────────────────────────────────────
+    request-id:
+      headers:
+        customRequestHeaders:
+          X-Request-ID: "{{.RequestID}}"
+
+    # ─── Middleware Chains ────────────────────────────────────────
+    # Chain: Public auth endpoints (signup, login, refresh)
+    chain-auth-public:
+      chain:
+        middlewares:
+          - security-headers
+          - cors
+          - rate-limit-auth
+
+    # Chain: Protected API endpoints (requires JWT)
+    chain-api:
+      chain:
+        middlewares:
+          - security-headers
+          - cors
+          - rate-limit-api
+          - forward-auth
+
+    # Chain: Protected auth endpoints (logout, profile, sessions)
+    chain-auth-protected:
+      chain:
+        middlewares:
+          - security-headers
+          - cors
+          - rate-limit-api
+          - forward-auth
+
+    # Chain: Frontend (static assets)
+    chain-frontend:
+      chain:
+        middlewares:
+          - security-headers
+          - rate-limit-public
+
+    # Chain: Webhook endpoints (no auth, lenient rate limit)
+    chain-webhooks:
+      chain:
+        middlewares:
+          - security-headers
+          - rate-limit-api

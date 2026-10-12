@@ -1,0 +1,26 @@
+torch==2.5.1
+torchaudio==2.5.1
+pyannote.audio==4.0.4
+# pyannote 4.0's actual transitive deps — installed manually (--no-deps on
+# pyannote.audio above) because the pip resolver otherwise pulls torch 2.11+cu130
+# which breaks driver 550. See plan/pyannote_4_migration.md §5.
+lightning
+pyannote.core
+pyannote.database
+pyannote.metrics
+pyannote.pipeline
+speechbrain
+asteroid-filterbanks
+torch-audiomentations
+pytorch-metric-learning
+omegaconf
+semver
+tensorboardX
+torchmetrics
+julius
+# Audio + service
+soundfile>=0.12
+numpy>=1.24,<2.0
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5

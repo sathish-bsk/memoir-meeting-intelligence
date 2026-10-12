@@ -1,0 +1,286 @@
+/* All styles scoped inside Shadow DOM — no leakage */
+
+.memoir-floating-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 24px;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  line-height: 1;
+}
+
+.memoir-floating-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.memoir-floating-btn--record {
+  background: #4F46E5;
+  color: white;
+}
+
+.memoir-floating-btn--joining {
+  background: #4F46E5;
+  color: white;
+  opacity: 0.8;
+  cursor: default;
+}
+
+.memoir-floating-btn--recording {
+  background: #1F2937;
+  color: white;
+}
+
+.memoir-floating-btn--disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ─── Toolbar mode: inline next to leave button ─── */
+
+.memoir-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 20px;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.memoir-toolbar-btn:hover {
+  filter: brightness(1.1);
+}
+
+.memoir-toolbar-btn--record {
+  background: #4F46E5;
+  color: white;
+}
+
+.memoir-toolbar-btn--joining {
+  background: #4F46E5;
+  color: white;
+  opacity: 0.8;
+  cursor: default;
+}
+
+.memoir-toolbar-btn--recording {
+  background: #1F2937;
+  color: white;
+}
+
+.memoir-toolbar-btn--disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Pulsing red dot */
+.memoir-rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #EF4444;
+  animation: memoir-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes memoir-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Spinner */
+.memoir-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: memoir-spin 0.8s linear infinite;
+}
+
+@keyframes memoir-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Notepad icon button */
+.memoir-notepad-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  color: white;
+  opacity: 0.8;
+}
+
+.memoir-notepad-btn:hover {
+  opacity: 1;
+}
+
+/* Quick notes panel */
+.memoir-notes-panel {
+  position: fixed;
+  bottom: 140px;
+  right: 24px;
+  z-index: 2147483647;
+  width: 280px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+}
+
+.memoir-notes-header {
+  padding: 12px 16px;
+  background: #F8F7F4;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: move;
+  user-select: none;
+}
+
+.memoir-notes-header.memoir-dragging {
+  cursor: grabbing;
+}
+
+.memoir-notes-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0;
+}
+
+.memoir-notes-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6B7280;
+  font-size: 18px;
+  padding: 0;
+  line-height: 1;
+}
+
+.memoir-notes-textarea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 200px;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  color: #1F2937;
+  box-sizing: border-box;
+}
+
+.memoir-notes-textarea::placeholder {
+  color: #9CA3AF;
+}
+
+.memoir-notes-footer {
+  padding: 8px 16px;
+  background: #F8F7F4;
+  border-top: 1px solid #E5E7EB;
+  font-size: 11px;
+  color: #9CA3AF;
+}
+
+/* Post-meeting CTA */
+.memoir-post-cta {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  z-index: 2147483647;
+  width: 300px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 20px;
+}
+
+.memoir-post-cta-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.memoir-post-cta-icon {
+  width: 32px;
+  height: 32px;
+  background: #4F46E5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.memoir-post-cta-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0;
+}
+
+.memoir-post-cta-body {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 16px;
+}
+
+.memoir-post-cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #4F46E5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.memoir-post-cta-link:hover {
+  background: #4338CA;
+}
+
+.memoir-post-cta-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9CA3AF;
+  font-size: 12px;
+  margin-left: 12px;
+}

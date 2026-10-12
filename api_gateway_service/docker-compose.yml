@@ -1,0 +1,33 @@
+# API Gateway Service — Production Docker Compose
+# Usage: docker compose up -d
+
+services:
+  # ─── Traefik API Gateway ──────────────────────────────────────────
+  traefik:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: videoclip-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme-data:/acme
+    environment:
+      - ACME_EMAIL=${ACME_EMAIL:-hello@meetmemoir.com}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://app.meetmemoir.com}
+    networks:
+      - gateway-network
+    labels:
+      - "traefik.enable=false"
+
+# ─── Networks ─────────────────────────────────────────────────────
+networks:
+  gateway-network:
+    name: gateway-network
+
+# ─── Volumes ──────────────────────────────────────────────────────
+volumes:
+  acme-data:

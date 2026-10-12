@@ -1,0 +1,19 @@
+# API Gateway Service — Dev Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Changes from production:
+# - Dev traefik config via volume mount (HTTP only, dashboard enabled)
+# - Dashboard exposed on port 8080
+# - No TLS
+
+services:
+  traefik:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik-dev.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+    ports:
+      - "80:80"
+      - "8080:8080"  # Dashboard
+    environment:
+      - CORS_ORIGIN=http://localhost:3000

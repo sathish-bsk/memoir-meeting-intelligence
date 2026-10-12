@@ -1,0 +1,21 @@
+services:
+  botworker:
+    build: .
+    ports:
+      - "8000:8000"
+    shm_size: "2g"
+    environment:
+      - STORAGE_BACKEND=local
+      - TRANSCRIPTION_URL=http://transcription:8001
+      - BACKEND_URL=http://host.docker.internal:3000
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./recordings:/tmp/recordings
+      - ./screenshots:/tmp/screenshots
+
+  transcription:
+    build: ../TranscriptionBase
+    ports:
+      - "8001:8000"
+    environment:
+      - ASR_MODEL_SIZE=base

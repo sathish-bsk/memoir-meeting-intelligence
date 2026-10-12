@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* Warm off-white palette (spec: memoir-frontend-spec.md §1.2) */
+    --background: 40 22% 96%;        /* #F8F7F4 warm off-white */
+    --foreground: 240 28% 14%;       /* #1A1A2E near-black */
+    --card: 0 0% 100%;               /* #FFFFFF pure white cards */
+    --card-foreground: 240 28% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 28% 14%;
+    --primary: 243 76% 59%;          /* #4F46E5 indigo */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 38 92% 50%;         /* #F59E0B warm amber */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 40 18% 93%;             /* #F0EEE9 sidebar tone */
+    --muted-foreground: 220 9% 46%;  /* #6B7280 */
+    --accent: 226 100% 97%;          /* #EEF2FF indigo tint */
+    --accent-foreground: 243 76% 59%;
+    --destructive: 0 84% 60%;        /* #EF4444 red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 20% 89%;            /* #E8E4DC warm border */
+    --input: 40 20% 89%;
+    --ring: 243 76% 59%;             /* indigo focus ring */
+    --chart-1: 243 76% 59%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 84% 60%;
+    --chart-5: 218 11% 65%;
+    --radius: 0.75rem;               /* 12px card radius */
+
+    /* Semantic tokens */
+    --sidebar: 40 18% 93%;           /* #F0EEE9 */
+    --sidebar-foreground: 240 28% 14%;
+    --sidebar-border: 40 20% 89%;
+    --sidebar-active: 243 76% 59%;
+    --success: 160 84% 39%;          /* #10B981 */
+    --warning: 38 92% 50%;           /* #F59E0B */
+    --text-secondary: 220 9% 46%;   /* #6B7280 */
+    --text-muted: 218 11% 65%;      /* #9CA3AF */
+  }
+
+  .dark {
+    --background: 240 28% 6%;
+    --foreground: 0 0% 98%;
+    --card: 240 28% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 28% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 243 76% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 38 80% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 20% 14%;
+    --muted-foreground: 218 11% 65%;
+    --accent: 243 40% 18%;
+    --accent-foreground: 243 76% 75%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 20% 18%;
+    --input: 240 20% 18%;
+    --ring: 243 76% 65%;
+    --chart-1: 243 70% 60%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 38 80% 55%;
+    --chart-4: 0 75% 55%;
+    --chart-5: 218 20% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

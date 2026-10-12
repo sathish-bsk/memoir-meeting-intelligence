@@ -1,0 +1,14 @@
+{
+    "name": "Memoir Audio Capture",
+    "version": "2.2.0",
+    "manifest_version": 3,
+    "permissions": ["tabs", "tabCapture", "offscreen"],
+    "host_permissions": ["<all_urls>"],
+    "background": { "service_worker": "background.js" },
+    "commands": {
+        "invoke-tab-capture": {
+            "suggested_key": { "default": "Ctrl+Shift+Y" },
+            "description": "Grant tabCapture invocation for the current meeting tab"
+        }
+    }
+}

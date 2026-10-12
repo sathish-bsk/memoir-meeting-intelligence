@@ -1,0 +1,41 @@
+# Traefik v3 — Static Configuration (Development)
+# HTTP only, dashboard enabled, no TLS.
+# Used via: --configFile=/etc/traefik/traefik-dev.yml
+
+# ─── API & Dashboard ──────────────────────────────────────────────
+api:
+  dashboard: true
+  insecure: true  # Dashboard accessible without auth at :8080
+
+# ─── Entrypoints ──────────────────────────────────────────────────
+entryPoints:
+  web:
+    address: ":80"
+    # No HTTPS redirect in dev
+
+# ─── Providers ────────────────────────────────────────────────────
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: videoclip-dev
+    watch: true
+
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# ─── Logging ──────────────────────────────────────────────────────
+log:
+  level: DEBUG
+  format: common  # Human-readable in dev
+
+accessLog:
+  format: common
+  fields:
+    headers:
+      defaultMode: drop
+      names:
+        X-Request-ID: keep
+        Authorization: redact
+        Cookie: redact

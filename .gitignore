@@ -1,0 +1,73 @@
+# ── Python ──
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.so
+dist/
+build/
+
+# ── Node ──
+node_modules/
+.next/
+.pnp
+.pnp.js
+
+# ── Environment & Secrets ──
+.env
+.env.local
+.env*.local
+.env.production
+.env.gpu
+keys/
+
+# ── Data & Media (large files) ──
+data/
+recordings/
+screenshots/
+*.pt
+*.bin
+*.onnx
+*.wav
+*.mp3
+*.mp4
+*.m4a
+*.webm
+*.ogg
+*.flac
+
+# ── Dev/Build artifacts ──
+.devflow/
+.dev-logs/
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+playwright-report/
+test-results/
+
+# ── IDE & OS ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Claude Code ──
+.claude/
+
+# ── Chrome Extension ──
+chrome_extension/dist/
+chrome_extension/*.zip
+
+# ── Service-specific ──
+api_gateway_service/traefik/acme/
+.worktrees/
+
+# Phase 3 cookies-only auth — never commit live sessions
+cookies.json
+**/cookies.json

@@ -1,0 +1,97 @@
+# Core API — Standalone Docker Compose
+# Usage: docker compose up
+services:
+  core-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: videoclip-core-api
+    restart: unless-stopped
+    depends_on:
+      core-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8005:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://core_user:${CORE_DB_PASSWORD:-corepass}@core-db:5432/videoclip_db
+      - REDIS_URL=redis://redis:6379/1
+      - INTERNAL_SERVICE_KEY=${INTERNAL_SERVICE_KEY}
+      - JWT_PUBLIC_KEY_PATH=/run/secrets/jwt_public_key
+      - ORCHESTRATOR_URL=${ORCHESTRATOR_URL:-http://host.docker.internal:4000}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://host.docker.internal:8001}
+      - STORAGE_BACKEND=local
+      - DATA_DIR=/app/data
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - core-data:/app/data
+    networks:
+      - core-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.core-api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.core-api.entrypoints=websecure"
+      - "traefik.http.routers.core-api.middlewares=chain-api@file"
+      - "traefik.http.routers.core-api.service=core-api-svc"
+      - "traefik.http.routers.core-api.priority=15"
+      # Internal endpoints — service key auth, no ForwardAuth
+      - "traefik.http.routers.core-api-internal.rule=PathPrefix(`/api/internal`)"
+      - "traefik.http.routers.core-api-internal.entrypoints=websecure"
+      - "traefik.http.routers.core-api-internal.middlewares=chain-webhooks@file"
+      - "traefik.http.routers.core-api-internal.service=core-api-svc"
+      - "traefik.http.routers.core-api-internal.priority=25"
+      # Public share-link endpoints — no auth (token is the secret)
+      - "traefik.http.routers.core-api-shared.rule=PathPrefix(`/api/shared`)"
+      - "traefik.http.routers.core-api-shared.entrypoints=websecure"
+      - "traefik.http.routers.core-api-shared.middlewares=chain-webhooks@file"
+      - "traefik.http.routers.core-api-shared.service=core-api-svc"
+      - "traefik.http.routers.core-api-shared.priority=25"
+      - "traefik.http.services.core-api-svc.loadbalancer.server.port=8000"
+
+  core-db:
+    image: postgres:16-alpine
+    container_name: videoclip-core-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=videoclip_db
+      - POSTGRES_USER=core_user
+      - POSTGRES_PASSWORD=${CORE_DB_PASSWORD:-corepass}
+    volumes:
+      - core-db-data:/var/lib/postgresql/data
+    networks:
+      - core-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U core_user -d videoclip_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=false"
+
+  redis:
+    image: redis:7-alpine
+    container_name: videoclip-core-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - core-redis-data:/data
+    networks:
+      - core-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=false"
+
+networks:
+  core-network:
+    name: core-network
+
+volumes:
+  core-db-data:
+  core-redis-data:
+  core-data:

@@ -1,0 +1,17 @@
+services:
+  resemble-enhance:
+    build:
+      context: ../resemble_enhance
+      dockerfile: Dockerfile
+    container_name: resemble-enhance
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    # Uncomment for GPU support (requires NVIDIA Container Toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]

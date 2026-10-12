@@ -1,0 +1,239 @@
+# VideoClip — Root Docker Compose (dev convenience — boots ALL infra + services)
+# Usage: docker compose up
+# Note: Each service can also run standalone via its own docker-compose.yml
+
+services:
+  # ═══════════════════════════════════════════════════════════════
+  # INFRASTRUCTURE
+  # ═══════════════════════════════════════════════════════════════
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: videoclip-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: videoclip
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-videoclipdev}
+      POSTGRES_DB: videoclip  # default DB (init script creates the rest)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - videoclip-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U videoclip"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: videoclip-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - videoclip-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: videoclip-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-minioadmin}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - videoclip-dev
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ═══════════════════════════════════════════════════════════════
+  # API GATEWAY
+  # ═══════════════════════════════════════════════════════════════
+
+  api-gateway:
+    image: traefik:v3.0
+    container_name: videoclip-gateway
+    restart: unless-stopped
+    command:
+      - "--configFile=/etc/traefik/traefik-dev.yml"
+    ports:
+      - "80:80"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./api_gateway_service/traefik/traefik-dev.yml:/etc/traefik/traefik-dev.yml:ro
+      - ./api_gateway_service/traefik/dynamic:/etc/traefik/dynamic:ro
+    environment:
+      CORS_ORIGIN: "http://localhost:3000"
+    networks:
+      - videoclip-dev
+
+  # ═══════════════════════════════════════════════════════════════
+  # AUTH SERVICE
+  # ═══════════════════════════════════════════════════════════════
+
+  auth-service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    container_name: videoclip-auth
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://videoclip:${DB_PASSWORD:-videoclipdev}@postgres:5432/auth_db
+      REDIS_URL: redis://redis:6379/0
+      JWT_PRIVATE_KEY_PATH: ./keys/private.pem
+      JWT_PUBLIC_KEY_PATH: ./keys/public.pem
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev-service-key-change-in-production}
+      BASE_URL: http://localhost
+      ENVIRONMENT: development
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - videoclip-dev
+    labels:
+      - "traefik.enable=true"
+      # Public auth routes
+      - "traefik.http.routers.auth-public.rule=PathPrefix(`/auth/login`) || PathPrefix(`/auth/signup`) || PathPrefix(`/auth/refresh`) || PathPrefix(`/auth/forgot-password`) || PathPrefix(`/auth/reset-password`) || PathPrefix(`/auth/verify-email`) || PathPrefix(`/auth/oauth`)"
+      - "traefik.http.routers.auth-public.entrypoints=web"
+      - "traefik.http.routers.auth-public.middlewares=chain-auth-public@file"
+      - "traefik.http.routers.auth-public.service=auth-svc"
+      - "traefik.http.routers.auth-public.priority=20"
+      # ForwardAuth verify endpoint
+      - "traefik.http.routers.auth-verify.rule=Path(`/auth/verify`)"
+      - "traefik.http.routers.auth-verify.entrypoints=web"
+      - "traefik.http.routers.auth-verify.middlewares=security-headers@file"
+      - "traefik.http.routers.auth-verify.service=auth-svc"
+      - "traefik.http.routers.auth-verify.priority=30"
+      # Protected auth routes
+      - "traefik.http.routers.auth-protected.rule=PathPrefix(`/auth`)"
+      - "traefik.http.routers.auth-protected.entrypoints=web"
+      - "traefik.http.routers.auth-protected.middlewares=chain-auth-protected@file"
+      - "traefik.http.routers.auth-protected.service=auth-svc"
+      - "traefik.http.routers.auth-protected.priority=10"
+      # Service port
+      - "traefik.http.services.auth-svc.loadbalancer.server.port=8000"
+
+  # ═══════════════════════════════════════════════════════════════
+  # CORE API
+  # ═══════════════════════════════════════════════════════════════
+
+  core-api:
+    build:
+      context: .
+      dockerfile: core_api/Dockerfile
+    container_name: videoclip-core-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://videoclip:${DB_PASSWORD:-videoclipdev}@postgres:5432/videoclip_db
+      REDIS_URL: redis://redis:6379/1
+      JWT_PUBLIC_KEY_PATH: ./keys/public.pem
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev-service-key-change-in-production}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      ORCHESTRATOR_URL: http://orchestrator:4000
+      STORAGE_BACKEND: local
+      DATA_DIR: /app/data
+      ENVIRONMENT: development
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - core-data:/app/data
+    networks:
+      - videoclip-dev
+    labels:
+      - "traefik.enable=true"
+      # Public API routes (with ForwardAuth)
+      - "traefik.http.routers.core-api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.core-api.entrypoints=web"
+      - "traefik.http.routers.core-api.middlewares=chain-api@file"
+      - "traefik.http.routers.core-api.service=core-api-svc"
+      - "traefik.http.routers.core-api.priority=15"
+      # Internal endpoints (service key auth, no ForwardAuth)
+      - "traefik.http.routers.core-api-internal.rule=PathPrefix(`/api/internal`)"
+      - "traefik.http.routers.core-api-internal.entrypoints=web"
+      - "traefik.http.routers.core-api-internal.middlewares=chain-webhooks@file"
+      - "traefik.http.routers.core-api-internal.service=core-api-svc"
+      - "traefik.http.routers.core-api-internal.priority=25"
+      # Public share-link endpoints (token is the secret, no ForwardAuth)
+      - "traefik.http.routers.core-api-shared.rule=PathPrefix(`/api/shared`)"
+      - "traefik.http.routers.core-api-shared.entrypoints=web"
+      - "traefik.http.routers.core-api-shared.middlewares=chain-webhooks@file"
+      - "traefik.http.routers.core-api-shared.service=core-api-svc"
+      - "traefik.http.routers.core-api-shared.priority=25"
+      # Service port
+      - "traefik.http.services.core-api-svc.loadbalancer.server.port=8000"
+
+  # ═══════════════════════════════════════════════════════════════
+  # INTEGRATION SERVICE
+  # ═══════════════════════════════════════════════════════════════
+
+  integration-service:
+    build:
+      context: .
+      dockerfile: integration_service/Dockerfile
+    container_name: videoclip-integration
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://videoclip:${DB_PASSWORD:-videoclipdev}@postgres:5432/videoclip_db
+      JWT_PUBLIC_KEY_PATH: ./keys/public.pem
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev-service-key-change-in-production}
+      FRONTEND_URL: http://localhost
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      CALENDAR_ENCRYPTION_KEY: ${CALENDAR_ENCRYPTION_KEY:-}
+      ENVIRONMENT: development
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - videoclip-dev
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.integration.rule=PathPrefix(`/integrations`)"
+      - "traefik.http.routers.integration.entrypoints=web"
+      - "traefik.http.routers.integration.middlewares=chain-api@file"
+      - "traefik.http.routers.integration.service=integration-svc"
+      - "traefik.http.routers.integration.priority=15"
+      - "traefik.http.services.integration-svc.loadbalancer.server.port=8000"
+
+# ═══════════════════════════════════════════════════════════════
+# NETWORKS & VOLUMES
+# ═══════════════════════════════════════════════════════════════
+
+networks:
+  videoclip-dev:
+    name: videoclip-dev
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
+  core-data:
