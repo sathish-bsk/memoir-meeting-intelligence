@@ -13,9 +13,10 @@ Designed, built, and operated end-to-end as a solo project (January – June 202
 
 ## What it does
 
-1. **Capture** a meeting in one of four ways:
-   - a **meeting bot** that joins Google Meet calls from the user's calendar,
-   - a **Chrome extension** that records the browser tab (single mixed stream, or separate tab + mic tracks),
+1. **Capture** a meeting in one of five ways:
+   - a **meeting bot** that joins Google Meet, Zoom, and Microsoft Teams calls from the user's Google or Outlook calendar,
+   - a **Chrome extension** that detects Meet, Zoom, and Teams meetings and records the browser tab (single mixed stream, or separate tab + mic tracks),
+   - **Zoom cloud-recording import** via OAuth and recording webhooks,
    - a **web recorder** page in the app,
    - **file / link upload**.
 2. **Transcribe** with a multi-stage speech pipeline: audio analysis → speaker diarization → speech recognition → word alignment → vocabulary and LLM-based correction.
